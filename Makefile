@@ -49,14 +49,14 @@ LIBS= hw_include/libdriver.a
 # The default rule, which causes init to be built.
 #
 all: ${COMPILER}           \
-     ${COMPILER}/RTOSDemo.axf \
+     ${COMPILER}/RTOSDemoBootloader.axf \
 	 
 #
 # The rule to clean out all the build products
 #
 
 clean:
-	@rm -rf ${COMPILER} ${wildcard *.bin} RTOSDemo.axf
+	@rm -rf ${COMPILER} ${wildcard *.bin} RTOSDemoBootloader.axf
 	
 #
 # The rule to create the target directory
@@ -64,9 +64,9 @@ clean:
 ${COMPILER}:
 	@mkdir ${COMPILER}
 
-${COMPILER}/RTOSDemo.axf: ${INIT_OBJS} ${OBJS} ${LIBS}
-SCATTER_RTOSDemo=standalone.ld
-ENTRY_RTOSDemo=ResetISR
+${COMPILER}/RTOSDemoBootloader.axf: ${INIT_OBJS} ${OBJS} ${LIBS}
+SCATTER_RTOSDemoBootloader=standalone.ld
+ENTRY_RTOSDemoBootloader=ResetISR
 
 #
 #

@@ -29,9 +29,11 @@
 /*Changed according to http://roboticravings.blogspot.com/2018/07/freertos-on-cortex-m3-with-qemu.html so the project can be compiled"*/
 MEMORY
 {
-    FLASH (rx) : ORIGIN = 0x00000000, LENGTH = 64K
-    SRAM (rwx) : ORIGIN = 0x20000000, LENGTH = 8K
+    FLASH (rx) : ORIGIN = 0x00000000, LENGTH = 16K
+    SRAM (rwx) : ORIGIN = 0x20000000, LENGTH = 64K
 }
+
+_app_start = 0x00000000 + 0x16000;
 
 SECTIONS
 {
