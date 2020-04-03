@@ -49,7 +49,7 @@ static void prvSetupHardware( void );
 static void vUARTTask( void *pvParameter );
 
 /* String that is transmitted on the UART. */
-static char *cMessage = "Hello world";
+static char *cMessage = "Hello world bootloader\n";
 static volatile char *pcNextChar;
 
 /*-----------------------------------------------------------*/
@@ -59,10 +59,34 @@ int main( void )
 	/* Configure the clocks, UART and GPIO. */
 	prvSetupHardware();
 
-	xTaskCreate(vUARTTask, "UART", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 1, NULL);
+	// xTaskCreate(vUARTTask, "UART", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 1, NULL);
 
-	/* Start the scheduler. */
-	vTaskStartScheduler();
+	// /* Start the scheduler. */
+	// vTaskStartScheduler();
+	int i;
+	for (i = 0; i < 2; i++)
+	{
+
+		/* Start the Tx of the message on the UART. */
+		UARTIntDisable( UART0_BASE, UART_INT_TX );
+		{
+			pcNextChar = cMessage;
+
+			/* Send the first character. */
+			if( !( HWREG( UART0_BASE + UART_O_FR ) & UART_FR_TXFF ) )
+			{
+				HWREG( UART0_BASE + UART_O_DR ) = *pcNextChar;
+			}
+
+			pcNextChar++;
+		}
+		UARTIntEnable(UART0_BASE, UART_INT_TX);
+
+		/* Make sure we don't process bounces. */
+	}
+
+	extern void *_app_start[];
+    ((void(*)())_app_start[1])();
 
 	/* Will only get here if there was insufficient heap to start the
 	scheduler. */
@@ -99,8 +123,8 @@ static void prvSetupHardware( void )
 
 static void vUARTTask( void *pvParameters )
 {
-
-	for( ;; )
+	int i=0;
+	for (i = 0; i < 2; i++)
 	{
 
 		/* Start the Tx of the message on the UART. */
@@ -121,6 +145,7 @@ static void vUARTTask( void *pvParameters )
 		/* Make sure we don't process bounces. */
 		vTaskDelay( mainUART_DELAY );
 	}
+	vTaskEndScheduler();
 }
 
 /*-----------------------------------------------------------*/
