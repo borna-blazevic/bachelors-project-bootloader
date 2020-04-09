@@ -38,35 +38,35 @@ _app_start = 0x00000000 + 0x16000;
 SECTIONS
 {
     .text :
-{
-KEEP(*(.isr_vector))
-    *(.text)
-    *(.rodata*)
-    _etext = .;
-} > FLASH
+    {
+        KEEP(*(.isr_vector))
+            *(.text)
+            *(.rodata*)
+            _etext = .;
+    } > FLASH
 
 /* .data : AT (ADDR(.text) + SIZEOF(.text)) */
-.ARM.exidx :
-{
-    *(.ARM.exidx*)
-    *(.gnu.linkonce.armexidx.*)
-} > FLASH
+    .ARM.exidx :
+    {
+        *(.ARM.exidx*)
+        *(.gnu.linkonce.armexidx.*)
+    } > FLASH
 
-_begin_data = .;
+    _begin_data = .;
 
-.data : AT ( _begin_data )
-{
-    _data = .;
-    *(vtable)
-    *(.data)
-    _edata = .;
-} > SRAM
+    .data : AT ( _begin_data )
+    {
+        _data = .;
+        *(vtable)
+        *(.data)
+        _edata = .;
+    } > SRAM
 
-.bss :
-{
-    _bss = .;
-    *(.bss)
-    *(COMMON)
-    _ebss = .;
-} > SRAM
+    .bss :
+    {
+        _bss = .;
+        *(.bss)
+        *(COMMON)
+        _ebss = .;
+    } > SRAM
 }
