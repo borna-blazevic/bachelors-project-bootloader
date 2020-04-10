@@ -34,6 +34,7 @@
 #include "task.h"
 #include "queue.h"
 #include "semphr.h"
+#include "string.h"
 
 /* Delay between cycles of the 'check' task. */
 #define mainUART_DELAY						( ( TickType_t ) 10000 / portTICK_PERIOD_MS )
@@ -51,7 +52,7 @@ static void vUARTTask( void *pvParameter );
 /* String that is transmitted on the UART. */
 static char *cMessage = "Hello world bootloader\n";
 static volatile char *pcNextChar;
-
+char *mes __attribute__((section(".bootenv"))) = "Bootloader sent hi\n";
 /*-----------------------------------------------------------*/
 
 int main( void )
@@ -63,27 +64,22 @@ int main( void )
 
 	// /* Start the scheduler. */
 	// vTaskStartScheduler();
-	int i;
-	for (i = 0; i < 2; i++)
-	{
-
 		/* Start the Tx of the message on the UART. */
-		UARTIntDisable( UART0_BASE, UART_INT_TX );
+	*mes="b";
+
+	UARTIntDisable(UART0_BASE, UART_INT_TX);
+	{
+		pcNextChar = mes;
+
+		/* Send the first character. */
+		if (!(HWREG(UART0_BASE + UART_O_FR) & UART_FR_TXFF))
 		{
-			pcNextChar = cMessage;
-
-			/* Send the first character. */
-			if( !( HWREG( UART0_BASE + UART_O_FR ) & UART_FR_TXFF ) )
-			{
-				HWREG( UART0_BASE + UART_O_DR ) = *pcNextChar;
-			}
-
-			pcNextChar++;
+			HWREG(UART0_BASE + UART_O_DR) = *pcNextChar;
 		}
-		UARTIntEnable(UART0_BASE, UART_INT_TX);
 
-		/* Make sure we don't process bounces. */
+		pcNextChar++;
 	}
+	UARTIntEnable(UART0_BASE, UART_INT_TX);
 
 	extern void *_app_start[];
     ((void(*)())_app_start[1])();

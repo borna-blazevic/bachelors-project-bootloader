@@ -40,6 +40,10 @@ SECTIONS
     .text :
     {
         KEEP(*(.isr_vector))
+        . = 0x200;
+        KEEP(*(.bootenv))
+        FILL(0x0)
+        . = ALIGN(4);
             *(.text)
             *(.rodata*)
             _etext = .;
