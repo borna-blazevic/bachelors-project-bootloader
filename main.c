@@ -35,6 +35,7 @@
 #include "queue.h"
 #include "semphr.h"
 #include "string.h"
+#include "stdlib.h"
 
 /* Delay between cycles of the 'check' task. */
 #define mainUART_DELAY						( ( TickType_t ) 10000 / portTICK_PERIOD_MS )
@@ -51,8 +52,10 @@ static void vUARTTask( void *pvParameter );
 
 /* String that is transmitted on the UART. */
 static char *cMessage = "Hello world bootloader\n";
+char pointer[10] = { 0 };
+// char bootenv[14] __attribute__((at(0x16000))) = "Bootenv Test\n";
+extern char _shared_data_start;
 static volatile char *pcNextChar;
-char *mes __attribute__((section(".bootenv"))) = "Bootloader sent hi\n";
 /*-----------------------------------------------------------*/
 
 int main( void )
@@ -65,21 +68,41 @@ int main( void )
 	// /* Start the scheduler. */
 	// vTaskStartScheduler();
 		/* Start the Tx of the message on the UART. */
-	*mes="b";
+	// UARTIntDisable(UART0_BASE, UART_INT_TX);
+	// {
+	// 	pcNextChar = bootenv;
 
-	UARTIntDisable(UART0_BASE, UART_INT_TX);
+	// 	/* Send the first character. */
+	// 	if (!(HWREG(UART0_BASE + UART_O_FR) & UART_FR_TXFF))
+	// 	{
+	// 		HWREG(UART0_BASE + UART_O_DR) = *pcNextChar;
+	// 	}
+
+	// 	pcNextChar++;
+	// }
+	char *bootenv = &_shared_data_start;
+
+	if (*bootenv != 'T')
 	{
-		pcNextChar = mes;
-
-		/* Send the first character. */
-		if (!(HWREG(UART0_BASE + UART_O_FR) & UART_FR_TXFF))
-		{
-			HWREG(UART0_BASE + UART_O_DR) = *pcNextChar;
-		}
-
-		pcNextChar++;
+		memcpy(bootenv, "Bootloader sent initial message\n", 37);
 	}
-	UARTIntEnable(UART0_BASE, UART_INT_TX);
+	else
+	{
+		UARTIntDisable(UART0_BASE, UART_INT_TX);
+		{
+			pcNextChar = bootenv;
+
+			/* Send the first character. */
+			if (!(HWREG(UART0_BASE + UART_O_FR) & UART_FR_TXFF))
+			{
+				HWREG(UART0_BASE + UART_O_DR) = *pcNextChar;
+			}
+
+			pcNextChar++;
+		}
+		UARTIntEnable(UART0_BASE, UART_INT_TX);
+		memcpy(bootenv, "Bootloader sent hi\n", 37);
+	}
 
 	extern void *_app_start[];
     ((void(*)())_app_start[1])();

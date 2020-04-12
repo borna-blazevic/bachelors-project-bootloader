@@ -30,9 +30,11 @@
 MEMORY
 {
     FLASH (rx) : ORIGIN = 0x00000000, LENGTH = 16K
-    SRAM (rwx) : ORIGIN = 0x20000000, LENGTH = 64K
+    SHARED (rwx) : ORIGIN = 0x20000000, LENGTH = 1K
+    SRAM (rwx) : ORIGIN = 0x20001000, LENGTH = 63K
 }
 
+_shared_data_start = ORIGIN(SHARED);
 _app_start = 0x00000000 + 0x16000;
 
 SECTIONS
@@ -40,9 +42,6 @@ SECTIONS
     .text :
     {
         KEEP(*(.isr_vector))
-        . = 0x200;
-        KEEP(*(.bootenv))
-        FILL(0x0)
         . = ALIGN(4);
             *(.text)
             *(.rodata*)
