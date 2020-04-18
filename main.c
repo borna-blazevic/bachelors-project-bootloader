@@ -63,30 +63,13 @@ int main( void )
 	/* Configure the clocks, UART and GPIO. */
 	prvSetupHardware();
 
-	// xTaskCreate(vUARTTask, "UART", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 1, NULL);
-
-	// /* Start the scheduler. */
-	// vTaskStartScheduler();
-		/* Start the Tx of the message on the UART. */
-	// UARTIntDisable(UART0_BASE, UART_INT_TX);
-	// {
-	// 	pcNextChar = bootenv;
-
-	// 	/* Send the first character. */
-	// 	if (!(HWREG(UART0_BASE + UART_O_FR) & UART_FR_TXFF))
-	// 	{
-	// 		HWREG(UART0_BASE + UART_O_DR) = *pcNextChar;
-	// 	}
-
-	// 	pcNextChar++;
-	// }
 	char *bootenv = &_shared_data_start;
 
-	if (*bootenv != 'T')
+	if (*bootenv != 'T' && *bootenv != 'U')
 	{
-		memcpy(bootenv, "Bootloader sent initial message\n", 37);
+		memcpy(bootenv, "Bootloader sent initial message\n", 33);
 	}
-	else
+	if (*bootenv == 'U')
 	{
 		UARTIntDisable(UART0_BASE, UART_INT_TX);
 		{
@@ -101,11 +84,31 @@ int main( void )
 			pcNextChar++;
 		}
 		UARTIntEnable(UART0_BASE, UART_INT_TX);
-		memcpy(bootenv, "Bootloader sent hi\n", 37);
+		memcpy(bootenv, "Bootloader sent to updated hi\n", 31);
+		
+		extern void *_app_start2[];
+		((void(*)())_app_start2[1])();
+	}else
+	{
+		UARTIntDisable(UART0_BASE, UART_INT_TX);
+		{
+			pcNextChar = bootenv;
+
+			/* Send the first character. */
+			if (!(HWREG(UART0_BASE + UART_O_FR) & UART_FR_TXFF))
+			{
+				HWREG(UART0_BASE + UART_O_DR) = *pcNextChar;
+			}
+
+			pcNextChar++;
+		}
+		UARTIntEnable(UART0_BASE, UART_INT_TX);
+		memcpy(bootenv, "Bootloader sent hi\n", 20);
+
+		extern void *_app_start1[];
+		((void(*)())_app_start1[1])();
 	}
 
-	extern void *_app_start[];
-    ((void(*)())_app_start[1])();
 
 	/* Will only get here if there was insufficient heap to start the
 	scheduler. */
