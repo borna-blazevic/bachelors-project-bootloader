@@ -69,18 +69,19 @@ int main( void )
 	if (*bootenv != 'T' && *bootenv != 'U')
 	{
 		memcpy(bootenv, "Bootloader sent initial message\n", 33);
+	}else
+	{
+		printUART(bootenv);
 	}
 	if (*bootenv == 'U')
 	{
-		printUART(bootenv);
 		memcpy(bootenv, "Bootloader sent to updated hi\n", 31);
-		
 		extern void *_app_start2[];
 		((void(*)())_app_start2[1])();
 	}else
 	{
-		printUART(bootenv);
-		memcpy(bootenv, "Bootloader sent hi\n", 20);
+		if(*bootenv == 'T')
+			memcpy(bootenv, "RBootloader sent hi\n", 21);
 
 		extern void *_app_start1[];
 		((void(*)())_app_start1[1])();
@@ -102,7 +103,6 @@ void printUART(char *mes){
 		UARTCharPut(UART0_BASE, *mes);
 		mes++;
 	}
-	UARTCharPut(UART0_BASE, '\n');
 }
 
 static void prvSetupHardware( void )
