@@ -28,15 +28,7 @@
 
 /* Scheduler includes. */
 #include "FreeRTOS.h"
-#include "hw_types.h"
-#include "hw_memmap.h"
-#include "task.h"
-#include "queue.h"
-#include "semphr.h"
-#include "uart.h"
-#include "lmi_flash.h"
-#include "sysctl.h"
-#include "string.h"
+#include <communication_uart.h>
 
 /* Delay between cycles of the 'check' task. */
 #define mainUART_DELAY						( ( TickType_t ) 10000 / portTICK_PERIOD_MS )
@@ -49,14 +41,8 @@ efficient. */
  * Configure the processor and peripherals for this demo.
  */
 static void prvSetupHardware( void );
-static void vUARTTask( void *pvParameter );
 
-/* String that is transmitted on the UART. */
-static char *cMessage = "Hello world bootloader\n";
-char pointer[10] = { 0 };
-// char bootenv[14] __attribute__((at(0x16000))) = "Bootenv Test\n";
 extern char _shared_data_start;
-static volatile char *pcNextChar;
 /*-----------------------------------------------------------*/
 
 int main( void )
@@ -71,7 +57,7 @@ int main( void )
 		memcpy(bootenv, "Bootloader sent initial message\n", 33);
 	}else
 	{
-		printUART(bootenv);
+		print_string(bootenv);
 	}
 	if (*bootenv == 'U')
 	{
@@ -96,18 +82,7 @@ int main( void )
 /*-----------------------------------------------------------*/
 
 
-void printUART(char *mes){
-	
-	while (*mes != '\0')
-	{
-		UARTCharPut(UART0_BASE, *mes);
-		mes++;
-	}
-}
-
 static void prvSetupHardware( void )
 {
-	SysCtlClockSet( SYSCTL_SYSDIV_4 | SYSCTL_USE_PLL | SYSCTL_OSC_MAIN | SYSCTL_XTAL_8MHZ );
-	SysCtlPeripheralEnable( SYSCTL_PERIPH_UART0 );
-	UARTEnable( UART0_BASE );
+	init_uart_communication();
 }

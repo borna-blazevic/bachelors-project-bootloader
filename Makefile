@@ -26,11 +26,10 @@
 include makedefs
 
 RTOS_SOURCE_DIR=FreeRTOS
-DEMO_SOURCE_DIR=Common/Minimal
 
-CFLAGS+=-I LuminaryMicro -I . -I ${RTOS_SOURCE_DIR}/include -I ${RTOS_SOURCE_DIR}/portable/GCC/ARM_CM3 -D GCC_ARMCM3_LM3S102 -D inline=
+CFLAGS+=-I LuminaryMicro -I ./include -I . -I ${RTOS_SOURCE_DIR}/include -I ${RTOS_SOURCE_DIR}/portable/GCC/ARM_CM3 -D GCC_ARMCM3_LM3S102 -D inline=
 
-VPATH=${RTOS_SOURCE_DIR}:${RTOS_SOURCE_DIR}/portable/MemMang:${RTOS_SOURCE_DIR}/portable/GCC/ARM_CM3:${DEMO_SOURCE_DIR}:init:LuminaryMicro
+VPATH=${RTOS_SOURCE_DIR}:${RTOS_SOURCE_DIR}/portable/MemMang:${RTOS_SOURCE_DIR}/portable/GCC/ARM_CM3:init:LuminaryMicro:src
 
 OBJS=${COMPILER}/main.o	\
 	  ${COMPILER}/list.o    \
@@ -38,6 +37,7 @@ OBJS=${COMPILER}/main.o	\
       ${COMPILER}/tasks.o   \
       ${COMPILER}/port.o    \
       ${COMPILER}/heap_1.o  \
+      ${COMPILER}/communication_uart.o  \
 	  ${COMPILER}/osram128x64x4.o
       
 INIT_OBJS= ${COMPILER}/startup.o
@@ -48,14 +48,14 @@ LIBS= LuminaryMicro/arm-none-eabi-gcc/libdriver.a
 # The default rule, which causes init to be built.
 #
 all: ${COMPILER}           \
-     ${COMPILER}/RTOSDemoBootloader.axf \
+     ${COMPILER}/bootloader.axf \
 	 
 #
 # The rule to clean out all the build products
 #
 
 clean:
-	@rm -rf ${COMPILER} ${wildcard *.bin} RTOSDemoBootloader.axf
+	@rm -rf ${COMPILER} ${wildcard *.bin} bootloader.axf
 	
 #
 # The rule to create the target directory
@@ -63,9 +63,9 @@ clean:
 ${COMPILER}:
 	@mkdir ${COMPILER}
 
-${COMPILER}/RTOSDemoBootloader.axf: ${INIT_OBJS} ${OBJS} ${LIBS}
-SCATTER_RTOSDemoBootloader=standalone.ld
-ENTRY_RTOSDemoBootloader=ResetISR
+${COMPILER}/bootloader.axf: ${INIT_OBJS} ${OBJS} ${LIBS}
+SCATTER_bootloader=standalone.ld
+ENTRY_bootloader=ResetISR
 
 #
 #
