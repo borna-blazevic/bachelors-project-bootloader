@@ -85,12 +85,12 @@ AR=arm-none-eabi-ar
 #
 # The command for calling the linker.
 #
-LD=arm-none-eabi-ld
+LD=arm-none-eabi-gcc
 
 #
 # The flags passed to the linker.
 #
-LDFLAGS= -Map gcc/out.map
+LDFLAGS= --specs=nosys.specs
 
 #
 # Get the location of libgcc.a from the GCC front-end.
