@@ -78,16 +78,15 @@ SECTIONS
         *(COMMON)
         _ebss = .;
         __bss_end__ = _ebss;
-        . = ALIGN (8);
-        _end = .;
-        end = .;
     } > SRAM
 
     ._user_heap_stack :
     {
-        . = ALIGN(4);
+        . = ALIGN(8);
+        PROVIDE ( end = . );
+        PROVIDE ( _end = . );
         . = . + _Min_Heap_Size;
         . = . + _Min_Stack_Size;
-        . = ALIGN(4);
+        . = ALIGN(8);
     } > SRAM
 }
