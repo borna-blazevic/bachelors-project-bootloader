@@ -1,6 +1,7 @@
 
 #include <stdint.h>
 #include <usart.h>
+#include <gpio.h>
 
 void print_uint32(uint32_t *mes)
 {
@@ -52,21 +53,26 @@ int read_uint32(uint32_t *mes)
 int read_uint8(uint8_t *mes)
 {
 
-    if (USART1_Dequeue(mes) == 0)
+    if (USART1_Dequeue((char *)mes) == 0)
         return -1;
     return 0;
 }
 int read_packet(uint8_t *mes, uint8_t *packet_size)
 {
 
-    uint8_t i = 0;
-    read_uint8(packet_size);
+    uint8_t i = 0; 
+    if(read_uint8(packet_size))
+        return -1;
+    
+
     while (i < *packet_size)
     {
-        read_uint8(mes);
+        if(read_uint8(mes))
+            continue;
         i++;
         mes++;
     }
+    return 0;
 }
 
 void init_communication()

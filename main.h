@@ -7,6 +7,7 @@
 #include <stm32f4xx_rcc.h>  // reset anc clocking
 #include <gpio.h>
 #include <communication.h>
+#include <flash.h>
 #include <memory_config.h>
 
 #endif
