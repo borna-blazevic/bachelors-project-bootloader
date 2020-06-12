@@ -9,7 +9,7 @@ int main(void)
 	NVIC_SetVectorTable(NVIC_VectTab_FLASH, 0x00000);
 	prvSetupHardware();
 	uint32_t *bootenv = (uint32_t *)&_shared;
-
+	bootenv[6] = 0x4a4f4242;
 	if (bootenv[3] != 1 && bootenv[3] != 2)
 	{
 		bootenv[3] = 1;
@@ -30,15 +30,21 @@ int main(void)
 			unlock_flash();
 			if (erase_flash_blocks((uint32_t)flash_start, (uint32_t)flash_end))
 			{
-				print_string("failed flash at erase\n");
-				*bootenv = 1;
+				print_string("\nfailed flash at erase\n");
+				bootenv[3] = 1;
+				print_string("booting recovery\n");
+				void **_app_start = (void **)&_recovery_image;
+				((void (*)())_app_start[1])();
 			}
 			if (write_flash_and_check_blocks((uint32_t)flash_start, (uint32_t)flash_end, firmware_beggining))
 			{
-				print_string("failed flash at write\n");
-				*bootenv = 1;
+				print_string("\nfailed flash at write\n");
+				bootenv[3] = 1;
+				print_string("booting recovery\n");
+				void **_app_start = (void **)&_recovery_image;
+				((void (*)())_app_start[1])();
 			}
-			print_string("flashed and checked\n");
+			print_string("\nflashed and checked\n");
 			bootenv[4] = 0;
 			lock_flash();
 			print_string("booting updated\n");
@@ -47,7 +53,7 @@ int main(void)
 		}
 		else
 		{
-			print_string("booting recovery\n");
+			print_string("\nbooting recovery\n");
 			void **_app_start = (void **)&_recovery_image;
 			((void (*)())_app_start[1])();
 		}
@@ -64,7 +70,7 @@ int main(void)
 			unlock_flash();
 			if (erase_flash_blocks((uint32_t)flash_start, (uint32_t)flash_end))
 			{
-				print_string("failed flash at erase\n");
+				print_string("\nfailed flash at erase\n");
 				bootenv[3] = 1;
 				print_string("booting recovery\n");
 				void **_app_start = (void **)&_recovery_image;
@@ -72,13 +78,13 @@ int main(void)
 			}
 			if (write_flash_and_check_blocks((uint32_t)flash_start, (uint32_t)flash_end, firmware_beggining))
 			{
-				print_string("failed flash at write\n");
+				print_string("\nfailed flash at write\n");
 				bootenv[3] = 1;
 				print_string("booting recovery\n");
 				void **_app_start = (void **)&_recovery_image;
 				((void (*)())_app_start[1])();
 			}
-			print_string("flashed and checked\n");
+			print_string("\nflashed and checked\n");
 			bootenv[4] = 0;
 			lock_flash();
 			print_string("booting updated\n");
@@ -92,17 +98,17 @@ int main(void)
 			{
 				if ((bootenv[1] >> i) && (bootenv[2] >> i))
 				{
-					print_string("mistake happened\n");
+					print_string("\nmistake happened\n");
 					bootenv[3] = 1;
 					print_string("booting recovery\n");
 					void **_app_start = (void **)&_recovery_image;
 					((void (*)())_app_start[1])();
 				}
-				print_string("booting updated\n");
-				bootenv[3] = 1;
-				void **_app_start = (void **)&_new_image;
-				((void (*)())_app_start[1])();
 			}
+			print_string("\nbooting updated\n");
+			bootenv[3] = 1;
+			void **_app_start = (void **)&_new_image;
+			((void (*)())_app_start[1])();
 		}
 	}
 }
